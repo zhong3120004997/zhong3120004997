@@ -1,1 +1,62 @@
+import java.io.*;
+import java.text.DecimalFormat;
+
+public class copyratetest {
+    public static void main(String[] args) throws IOException {
+        if (args.length==0){
+            System.out.println("输入参数有误！");
+            return;
+        }
+        int k=1;
+        while (k<args.length){
+        String originalFilePath = args[0];
+        String copiedFilePath = args[k];
+        k++;
+       //String originalFilePath = "C:\\Users\\sunshine\\OneDrive\\文档\\测试文本\\orig.txt";
+       //String copiedFilePath =   "C:\\Users\\sunshine\\OneDrive\\文档\\测试文本\\orig_0.8_add.txt";
+        compareText(originalFilePath,copiedFilePath);
+    }
+    }
+
+    private static void compareText(String originalFilePath,String copiedFilePath ) throws IOException {
+        String originalText = getTextFromFile(originalFilePath);
+        String copiedText = getTextFromFile(copiedFilePath);
+        int originalLength = originalText.length();
+        int copiedLength = copiedText.length();
+        int[][] dp = new int[originalLength + 1][copiedLength + 1];
+        for (int i = 0; i <= originalLength; i++) {
+            for (int j = 0; j <= copiedLength; j++) {
+                if (i == 0 || j == 0) {
+                    dp[i][j] = 0;
+                } else if (originalText.charAt(i - 1) == copiedText.charAt(j - 1)) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        int commonLength = dp[originalLength][copiedLength];
+        double plagiarismRate = (double) commonLength / originalLength * 100;
+        DecimalFormat df = new DecimalFormat("00.00");
+        System.out.println("The copyrate is: " + df.format(plagiarismRate) + "%");
+        String result = originalFilePath + "   and   " + copiedFilePath + "    copyrate:" + df.format(plagiarismRate) + "%";
+        BufferedWriter bw = new BufferedWriter(new FileWriter("copyrate.txt", true));
+        bw.write(result);
+        bw.newLine();
+        bw.close();
+    }
+
+    private static String getTextFromFile(String filePath) {
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return sb.toString();
+    }
+}
 
